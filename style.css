@@ -1,0 +1,36 @@
+body {
+    display: flex;
+    justify-content: center; /* horizontal */
+    align-items: center;     /* vertical */
+    height: 100vh;
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(
+        135deg,
+        #ffffff,
+        #f3f4f6
+    );
+}
+
+.cardb {
+    background: #18181b;
+    color: #f8fafc;
+
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+
+    padding: 32px;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.4),
+        0 0 0 1px rgba(255,255,255,0.03) inset;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(
+        135deg,
+        #ffffff,
+        #f3f4f6
+    );
+}
