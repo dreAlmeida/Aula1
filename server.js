@@ -6,14 +6,20 @@ const app = express();
 app.use(cors());
  
 const API_URL = "https://quizapi.io/api/v1/questions";
-const API_KEY = ""; // substitua pela chave real
-const QUIZ_ID = "cmu3ifhb7005hu3uttrl5twqj"; // substitua pelo ID do quiz pronto
+const API_KEY = "qa_sk_7df6e65e2bcc538f4ad7e9904b5965c2e4b8e851"; // substitua pela sua chave real se não for "segredo"
+const QUIZ_ID = "cmu3ifhb7005hu3uttrl5twqj";
  
 app.get("/quiz", async (req, res) => {
   try {
     const response = await axios.get(API_URL, {
-      headers: { "X-Api-Key": API_KEY },
-      params: { quiz: QUIZ_ID }
+      headers: { 
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      params: { 
+        quiz_id: QUIZ_ID,
+        include_answers: "true"
+      }
     });
     res.json(response.data);
   } catch (error) {
@@ -22,4 +28,4 @@ app.get("/quiz", async (req, res) => {
   }
 });
  
-app.listen(3000, () => console.log("Servidor rodando na porta 3000"));
+app.listen(3000, () => console.log("Servidor rodando em http://localhost:3000"));
