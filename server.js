@@ -7,7 +7,7 @@ app.use(cors());
  
 const API_URL = "https://quizapi.io/api/v1/questions";
 const API_KEY = "qa_sk_7df6e65e2bcc538f4ad7e9904b5965c2e4b8e851"; // substitua pela sua chave real se não for "segredo"
-const QUIZ_ID = "cmu3ifhb7005hu3uttrl5twqj";
+const QUIZ_ID = "cmu3ifhb7005hu3uttrl5twqj"; //cmu3ifhb7005hu3uttrl5twqj
  
 app.get("/quiz", async (req, res) => {
   try {

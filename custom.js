@@ -1,48 +1,171 @@
-function carregarPergunta() {
-    // Chamada direta para o servidor local (sem enviar headers ou API_KEY pelo client)
+let perguntas = [];
+let perguntaAtual = 0;
+let pontuacao = 0;
+let respondida = false;
+
+function carregarQuiz() {
+
     axios.get("http://localhost:3000/quiz")
-    .then(response => {
-        // Pega a primeira pergunta do quiz retornado
-        const pergunta = response.data[0]; 
-        
-        // Exibe o texto da questão recebido via .text
-        document.getElementById("pergunta").innerText = pergunta.text;
+        .then(response => {
 
-        const opcoesDiv = document.getElementById("opcoes");
-        opcoesDiv.innerHTML = "";
+            perguntas = response.data.data;
 
-        Object.entries(pergunta.answers).forEach(([key, value]) => {
-            // Renderiza apenas as opções preenchidas
-            if (value) { 
-                const col = document.createElement("div");
-                col.className = "col-6";
-
-                const btn = document.createElement("button");
-                btn.className = "btn btn-primary w-100 mb-2";
-                btn.innerText = value;
-                
-                // Trata o retorno para garantir comparação booleana sem falhar por tipo
-                const ehCorreta = String(pergunta.correct_answers[`${key}_correct`]).toLowerCase() === "true";
-                btn.onclick = () => verificarResposta(ehCorreta);
-
-                col.appendChild(btn);
-                opcoesDiv.appendChild(col);
-            }
+            exibirPergunta();
+        })
+        .catch(error => {
+            console.error("Erro:", error);
         });
-    })
-    .catch(error => {
-        console.error("Erro ao carregar pergunta:", error);
-        alert("⚠️ Não foi possível carregar a pergunta. Verifique a conexão com o servidor local.");
+}
+
+function exibirPergunta() {
+
+    respondida = false;
+
+    const pergunta = perguntas[perguntaAtual];
+
+    document.getElementById("contador").innerText =
+        `${perguntaAtual + 1}/${perguntas.length}`;
+
+    document.getElementById("pergunta").innerText =
+        pergunta.text;
+
+    document.getElementById("feedback").innerHTML = "";
+
+    const opcoesDiv = document.getElementById("opcoes");
+    opcoesDiv.innerHTML = "";
+
+    pergunta.answers.forEach(answer => {
+
+        const col = document.createElement("div");
+        col.className = "col-md-6";
+
+        const btn = document.createElement("button");
+
+        btn.className =
+            "btn btn-primary w-100 py-3";
+
+        btn.innerText = answer.text;
+
+        btn.onclick = () =>
+            responder(answer, pergunta);
+
+        col.appendChild(btn);
+
+        opcoesDiv.appendChild(col);
     });
 }
 
-function verificarResposta(correto) {
-    if (correto) {
-        alert("✅ Parabéns! Resposta correta.");
+function responder(answerSelecionada, pergunta) {
+
+    if (respondida) return;
+
+    respondida = true;
+
+    const botoes =
+        document.querySelectorAll("#opcoes button");
+
+    botoes.forEach(btn => {
+
+        btn.disabled = true;
+
+        const resposta = pergunta.answers.find(
+            r => r.text === btn.innerText
+        );
+
+        if (resposta.isCorrect) {
+            btn.classList.remove("btn-primary");
+            btn.classList.add("btn-success");
+        }
+    });
+
+    if (answerSelecionada.isCorrect) {
+
+        pontuacao++;
+
+        document.getElementById("pontuacao").innerText =
+            pontuacao;
+
     } else {
-        alert("❌ Resposta incorreta. Tente novamente.");
+
+        botoes.forEach(btn => {
+
+            if (btn.innerText === answerSelecionada.text) {
+
+                btn.classList.remove("btn-primary");
+                btn.classList.add("btn-danger");
+            }
+        });
     }
+
+    document.getElementById("feedback").innerHTML = `
+        <div class="alert ${
+            answerSelecionada.isCorrect
+                ? 'alert-success'
+                : 'alert-danger'
+        }">
+            <strong>
+            ${
+                answerSelecionada.isCorrect
+                    ? '✅ Resposta correta!'
+                    : '❌ Resposta incorreta!'
+            }
+            </strong>
+
+            <hr>
+
+            ${pergunta.explanation}
+        </div>
+    `;
+
+    setTimeout(() => {
+
+        perguntaAtual++;
+
+        if (perguntaAtual < perguntas.length) {
+            exibirPergunta();
+        } else {
+            finalizarQuiz();
+        }
+
+    }, 2500);
 }
 
-// Inicializa a chamada assim que a página carrega
-carregarPergunta();
+function finalizarQuiz() {
+
+    const percentual =
+        Math.round(
+            (pontuacao / perguntas.length) * 100
+        );
+
+    document.querySelector(".cardb").innerHTML = `
+        <div class="text-center">
+
+            <h1>🎉 Quiz Finalizado!</h1>
+
+            <h3 class="mt-4">
+                Você acertou
+                ${pontuacao}
+                de
+                ${perguntas.length}
+                perguntas
+            </h3>
+
+            <h2 class="mt-3">
+                ${percentual}% de aproveitamento
+            </h2>
+
+            <button
+                class="btn btn-primary mt-4"
+                onclick="reiniciarQuiz()">
+                Jogar novamente
+            </button>
+
+        </div>
+    `;
+}
+
+function reiniciarQuiz() {
+    location.reload();
+}
+
+carregarQuiz();
